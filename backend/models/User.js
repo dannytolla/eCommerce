@@ -55,4 +55,4 @@ UserSchema.methods.getJwtToken = async function () {
 
 const User = new mongoose.model("User", UserSchema);
 
-export default User;
+module.exports = User;

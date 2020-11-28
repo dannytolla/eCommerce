@@ -1,3 +1,4 @@
+// const express = require("express");
 const express = require("express");
 const router = express.Router();
 
@@ -25,3 +26,5 @@ router
   .get(protect, admin, getUserById)
   .put(protect, admin, updateUser)
   .delete(protect, admin, removeUser);
+
+module.exports = router;

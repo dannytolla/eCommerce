@@ -1,7 +1,7 @@
-import User from "../models/User";
+const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
 
-const authUser = asyncHandler(async (req, res) => {
+exports.authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email }).select("+password");
@@ -14,7 +14,7 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-const registerUser = asyncHandler(async (req, res) => {
+exports.registerUser = asyncHandler(async (req, res) => {
   let user = await User.findOne({ email });
 
   if (user) {
@@ -22,7 +22,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("User already exists");
   }
 
-  const user = await User.create({
+  user = await User.create({
     name,
     email,
     password,
@@ -31,13 +31,13 @@ const registerUser = asyncHandler(async (req, res) => {
   sendTokenResponse(user, 201, res);
 });
 
-const getUserProfile = asyncHandler(async (req, res) => {
+exports.getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
 
   res.json(user);
 });
 
-const updateUserProfile = asyncHandler(async (req, res) => {
+exports.updateUserProfile = asyncHandler(async (req, res) => {
   const fieldsToUpdate = {
     name: req.body.name,
     email: req.body.email,
@@ -51,13 +51,13 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
-const getUsers = asyncHandler(async (req, res) => {
+exports.getUsers = asyncHandler(async (req, res) => {
   const users = await User.findA({});
 
   res.json(users);
 });
 
-const removeUser = asyncHandler(async (req, res) => {
+exports.removeUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
   if (user) {
@@ -69,7 +69,7 @@ const removeUser = asyncHandler(async (req, res) => {
   }
 });
 
-const getUserById = asyncHandler(async (req, res) => {
+exports.getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
   if (user) {
@@ -80,7 +80,7 @@ const getUserById = asyncHandler(async (req, res) => {
   }
 });
 
-const updateUser = asyncHandler(async (req, res) => {
+exports.updateUser = asyncHandler(async (req, res) => {
   const { name, email, isAdmin } = req.body;
   const fieldsToUpdate = {
     name,
@@ -102,15 +102,4 @@ const sendTokenResponse = async (user, status, res) => {
   const token = await user.getJwtToken();
 
   res.status(status).json(token);
-};
-
-export {
-  authUser,
-  registerUser,
-  updateUserProfile,
-  getUsers,
-  getUserProfile,
-  removeUser,
-  getUserById,
-  updateUser,
 };
