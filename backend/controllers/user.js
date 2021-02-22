@@ -1,7 +1,8 @@
 const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
+const ErrorResponse = require("../utils/errorResponse");
 
-exports.authUser = asyncHandler(async (req, res) => {
+exports.authUser = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email }).select("+password");
@@ -9,17 +10,16 @@ exports.authUser = asyncHandler(async (req, res) => {
   if (user && (await user.matchPassword(password))) {
     sendTokenResponse(user, 200, res);
   } else {
-    res.status(401);
-    throw new Error("Invalid email or password");
+    return next(new ErrorResponse("Invalid email or password", 400));
   }
 });
 
-exports.registerUser = asyncHandler(async (req, res) => {
+exports.registerUser = asyncHandler(async (req, res, next) => {
+  const { name, email, password } = req.body;
   let user = await User.findOne({ email });
 
   if (user) {
-    res.status(400);
-    throw new Error("User already exists");
+    return next(new ErrorResponse("User already exists", 400));
   }
 
   user = await User.create({
@@ -52,35 +52,33 @@ exports.updateUserProfile = asyncHandler(async (req, res) => {
 });
 
 exports.getUsers = asyncHandler(async (req, res) => {
-  const users = await User.findA({});
+  const users = await User.find({});
 
   res.json(users);
 });
 
-exports.removeUser = asyncHandler(async (req, res) => {
+exports.removeUser = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.params.id);
 
   if (user) {
     await user.remove();
     res.json({ msg: "User Removed" });
   } else {
-    res.status(404);
-    throw new Error("User not found");
+    return next(new ErrorResponse("User not found", 404));
   }
 });
 
-exports.getUserById = asyncHandler(async (req, res) => {
+exports.getUserById = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.params.id);
 
   if (user) {
     res.json(user);
   } else {
-    res.status(404);
-    throw new Error("User not found");
+    return next(new ErrorResponse("User not found", 404));
   }
 });
 
-exports.updateUser = asyncHandler(async (req, res) => {
+exports.updateUser = asyncHandler(async (req, res, next) => {
   const { name, email, isAdmin } = req.body;
   const fieldsToUpdate = {
     name,
@@ -93,13 +91,12 @@ exports.updateUser = asyncHandler(async (req, res) => {
   });
 
   if (!user) {
-    res.status(404);
-    throw new Error("User not found");
+    return next(new ErrorResponse("User not found", 404));
   }
 });
 
 const sendTokenResponse = async (user, status, res) => {
   const token = await user.getJwtToken();
 
-  res.status(status).json(token);
+  res.status(status).json({ token });
 };

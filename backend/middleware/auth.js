@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/User.js");
+const ErrorResponse = require("../utils/errorResponse");
 
 exports.protect = asyncHandler(async (req, res, next) => {
   let token;
@@ -18,9 +19,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
       next();
     } catch (error) {
-      console.error(error);
-      res.status(401);
-      throw new Error("Not authorized, token failed");
+      return next(
+        new ErrorResponse("Not authorized to access this route", 401)
+      );
     }
   }
 
@@ -34,7 +35,6 @@ exports.admin = (req, res, next) => {
   if (req.user && req.user.isAdmin) {
     next();
   } else {
-    res.status(401);
-    throw new Error("Not authorized as an admin");
+    return next(new ErrorResponse("Not authorized as an admin", 401));
   }
 };
