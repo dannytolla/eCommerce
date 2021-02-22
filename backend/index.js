@@ -3,16 +3,16 @@ const express = require("express");
 const dotenv = require("dotenv");
 const colors = require("colors");
 const ConnectDB = require("./config/db");
-const { notFound, errorHandler } = require("./middleware/errorMiddleware");
+const errorHandler = require("./middleware/error");
 
 dotenv.config({
   path: "./backend/config/config.env",
 });
 
 const User = require("./routes/userRoute");
-// const Product = require("./routes/productRoute");
-// const Order = require("./routes/orderRoute");
-// const Upload = require("./routes/uploadRoute");
+const Product = require("./routes/productRoute");
+const Order = require("./routes/orderRoute");
+const Upload = require("./routes/uploadRoute");
 
 ConnectDB();
 
@@ -20,14 +20,13 @@ const app = express();
 
 app.use(express.json());
 
-// app.use("/api/product", Product);
-// app.use("/api/order", Order);
+app.use("/api/product", Product);
+app.use("/api/order", Order);
 app.use("/api/user", User);
-// app.use("/api/upload", Upload);
+app.use("/api/upload", Upload);
 
 app.use(express.static(path.join(__dirname, "uploads")));
 
-app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
